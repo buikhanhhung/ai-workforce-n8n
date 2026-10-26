@@ -1,0 +1,8 @@
+{
+  "objective": "Create a chapter timeline with timestamps for the coaching session transcript in the context, then write a LinkedIn post that summarizes the chapters.",
+  "requested_by": "e2e-test",
+  "max_revision_cycles": 0,
+  "context": {
+    "transcript": "[Test transcript without timestamps] Welcome everyone, today we focus on delegation. First mistake: delegating tasks without the context behind them. Exercise: write the why for one task you delegate this week. Second mistake: checking in too often. Wrap-up and homework."
+  }
+}

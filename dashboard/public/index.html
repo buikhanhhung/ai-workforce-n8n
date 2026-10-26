@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Workforce</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+ <div class="app">
+  <aside class="sidebar">
+    <div class="side-brand"><div class="logo">W</div><span>AI Workforce</span></div>
+    <nav id="side-nav" class="side-nav" aria-label="Phòng ban">
+      <a href="#ceo" data-scope="ceo"><span class="ico">🏢</span><span class="lbl">Tổng quan · CEO</span><span class="cnt" data-busy="ceo"></span></a>
+    </nav>
+    <nav id="side-sys" class="side-nav" aria-label="Hệ thống">
+      <div class="group">HỆ THỐNG</div>
+      <a href="#settings" data-sys="settings"><span class="ico">⚙️</span><span class="lbl">Kết nối &amp; tài khoản</span><span class="cnt" id="settings-todo"></span></a>
+    </nav>
+    <p class="side-note">Mỗi phòng ban giao việc cho agent của phòng mình. Phân quyền sẽ được thêm sau.</p>
+  </aside>
+  <main class="shell" data-mode="ops">
+    <header class="panel top">
+      <div class="brand">
+        <div class="logo" id="scope-icon">W</div>
+        <div>
+          <h1 id="scope-title">Vận hành doanh nghiệp bằng <span class="accent">đội ngũ nhân sự AI</span></h1>
+          <p id="scope-sub" class="scope-sub"></p>
+        </div>
+      </div>
+      <div class="stats scope-only">
+        <div class="stat" id="stat-depts-box"><b id="stat-depts">–</b><span>phòng ban</span></div>
+        <div class="stat"><b id="stat-employees">–</b><span>nhân sự AI</span></div>
+        <div class="stat active"><b id="stat-busy">–</b><span>đang làm</span></div>
+      </div>
+    </header>
+
+    <section id="settings" class="settings-only"></section>
+
+    <nav class="view-tabs scope-only" aria-label="Chế độ xem">
+      <a href="#ceo" data-view-tab="ops">🏠 Điều hành</a>
+      <a href="#ceo/library" data-view-tab="library">📚 Thư viện nội dung <span id="lib-tab-count" class="cnt"></span></a>
+    </nav>
+
+    <section id="library" class="panel library library-only">
+      <div class="lib-toolbar">
+        <input id="lib-q" type="search" autocomplete="off" placeholder="Tìm trong nội dung, tiêu đề, yêu cầu…">
+        <select id="lib-employee" aria-label="Agent"><option value="">Tất cả agent</option></select>
+        <select id="lib-approval" aria-label="Duyệt">
+          <option value="">Mọi trạng thái duyệt</option>
+          <option value="awaiting">✋ Chờ duyệt</option>
+          <option value="approved">✓ Đã duyệt</option>
+          <option value="in_progress">⟳ Đang làm / CEO review</option>
+          <option value="rejected">✗ Bị từ chối</option>
+          <option value="cancelled">⊘ Đã huỷ</option>
+        </select>
+      </div>
+      <div id="lib-status" class="lib-chips" role="tablist"></div>
+      <div id="lib-grid" class="lib-grid"></div>
+      <div class="lib-foot"><span id="lib-info" class="empty"></span>
+        <button type="button" id="lib-more" class="btn small" hidden>Tải thêm</button></div>
+    </section>
+
+    <section class="panel command ops-only">
+      <form id="command-form" class="command-row">
+        <div class="brain" aria-hidden="true">🧠</div>
+        <input id="objective" autocomplete="off" maxlength="4000"
+               placeholder="Giao việc cho công ty… (vd: phân tích transcript, viết bài LinkedIn và làm visual kèm theo)">
+        <button type="button" id="toggle-attach" class="btn ghost" title="Đính kèm tài liệu">📎 <span id="attach-count"></span></button>
+        <button type="submit" id="send" class="btn gold">Gửi</button>
+        <button type="button" id="open-history" class="btn ghost">🕘 Lịch sử (<span id="history-count">0</span>)</button>
+      </form>
+
+      <div id="attachments" class="attachments" hidden>
+        <div id="attachment-list"></div>
+        <button type="button" id="add-attachment" class="btn ghost small">+ Thêm tài liệu</button>
+        <p class="hint">Tài liệu được chia sẻ cho mọi nhân sự trong kế hoạch. Không dán mật khẩu hay khoá API.</p>
+      </div>
+
+      <div id="banner" class="banner" hidden></div>
+
+      <div class="recent">
+        <div class="section-head">
+          <span>KẾT QUẢ GẦN ĐÂY · <span id="recent-count">0</span></span>
+          <span class="actions"><a id="recent-library" class="btn ghost small" href="#ceo/library">📚 Xem tất cả trong Thư viện</a>
+            <button type="button" id="clear-recent" class="btn ghost small">Dọn hết</button></span>
+        </div>
+        <ul id="recent-list" class="recent-list"></ul>
+      </div>
+    </section>
+
+    <section id="approvals" class="panel approvals ops-only" hidden>
+      <div class="section-head"><span>✋ CHỜ BẠN DUYỆT</span></div>
+      <ul id="approval-list"></ul>
+    </section>
+
+    <section id="plan-strips" class="ops-only"></section>
+
+    <section id="departments" class="departments ops-only"></section>
+
+    <p id="connection" class="connection"></p>
+  </main>
+ </div>
+
+  <div id="modal" class="modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true">
+      <header class="modal-head">
+        <h2 id="modal-title"></h2>
+        <button type="button" class="icon-btn" data-close aria-label="Đóng">✕</button>
+      </header>
+      <div id="modal-body" class="modal-body"></div>
+    </div>
+  </div>
+
+  <script src="/content-views.js"></script>
+  <script src="/app.js"></script>
+  <script src="/settings.js"></script>
+</body>
+</html>

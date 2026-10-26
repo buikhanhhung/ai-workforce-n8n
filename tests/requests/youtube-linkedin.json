@@ -1,0 +1,9 @@
+{
+  "objective": "Analyze this YouTube video, create a LinkedIn post, generate a matching sketch-style visual, and prepare the final content for publication.",
+  "requested_by": "e2e-test",
+  "context": {
+    "target_audience": "operations managers at mid-size companies",
+    "brand_guidelines": "Colors: navy #1B2A4A, orange #FF7A00, off-white #F7F5F0. Font: Inter. Tone: practical, no hype. Logo bottom-right only.",
+    "transcript": "[Test transcript written for this end-to-end test] Today I want to talk about why most automation projects fail. In our team we automated invoice processing last year. The first attempt failed because we automated a broken process: approvals bounced between three people and nobody owned exceptions. So step one was mapping the process on a whiteboard and removing two approval steps. Step two, we started with the most boring, high-volume case: standard supplier invoices, about 70 percent of our volume. Step three, every exception went to one named owner with a 24-hour response rule. After three months, the average processing time dropped from 6 days to 2 days. The lesson: fix the process first, automate the boring majority second, and give exceptions a human owner."
+  }
+}

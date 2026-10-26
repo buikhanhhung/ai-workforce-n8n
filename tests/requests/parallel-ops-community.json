@@ -1,0 +1,10 @@
+{
+  "objective": "Prepare this week's internal operations and community briefing: (1) check the WeCommitDW system data for anomalies and risks, (2) triage the community threads and draft replies, (3) build a chapter timeline for the coaching session transcript. These three can be done independently. Then (4) recommend which employee and skills should own the follow-up actions from all three results.",
+  "requested_by": "e2e-test",
+  "max_revision_cycles": 0,
+  "context": {
+    "system_data": "[Test data] WeCommitDW nightly report 2026-10-11\n02:00 ETL job dw_sales_load started\n02:47 ETL job dw_sales_load finished rows=1,204,331 (avg last 7 days: 1,190,000)\n03:00 ETL job dw_customer_sync started\n03:00 ERROR dw_customer_sync: connection timeout to crm-replica (attempt 1/3)\n03:05 ERROR dw_customer_sync: connection timeout to crm-replica (attempt 2/3)\n03:10 dw_customer_sync finished rows=0\nDisk usage /data: 91% (threshold 85%)\nBackup job: last successful run 2026-10-08",
+    "community_data": "[Test data] Thread #412 by Lan: 'I paid for the annual plan twice this month, can someone refund one?' (no replies, 2 days)\nThread #415 by Minh: 'How do I export my course certificate as PDF?' (no replies, 1 day)\nThread #418 by Tom: 'The new lesson video won't play on Safari.' (3 likes, no staff reply)\nThread #420 by Hoa: 'Loved the last live session, thanks!' (5 likes)",
+    "transcript": "[Test transcript] 00:00 Welcome everyone, today we focus on delegation.\n02:15 First mistake: delegating tasks without the context behind them.\n05:40 Exercise: write the 'why' for one task you delegate this week.\n09:10 Second mistake: checking in too often, which signals distrust.\n12:30 Agree on check-in points up front instead.\n15:45 Q&A: how to delegate to someone more senior than you.\n19:20 Wrap-up and homework: delegate one task with full context."
+  }
+}

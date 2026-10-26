@@ -1,0 +1,951 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Workforce · Trình bày dự án</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0c0e; --panel: #151518; --card: #1b1b1f; --border: #2a2a31; --border-hi: #3a3a42;
+    --text: #ececef; --muted: #9a9aa4; --faint: #6a6a73; --gold: #e6c27a; --gold-ink: #2a1f08;
+    --ok: #6fcf8e; --warn: #e8b04a; --danger: #e0574f; --mkt: #e8b04a; --ops: #86aede; --cs: #63c483;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #050506; color: var(--text); overflow: hidden;
+    font-family: 'Be Vietnam Pro', system-ui, 'Segoe UI', sans-serif; }
+  /* 16:9 stage scaled to the window */
+  .viewport { position: fixed; inset: 0; display: grid; place-items: center; }
+  .stage { width: 1280px; height: 720px; position: relative; transform-origin: center; }
+  .slide { position: absolute; inset: 0; padding: 56px 72px 64px; background: var(--bg);
+    border: 1px solid var(--border); border-radius: 18px; display: none; flex-direction: column; gap: 22px; overflow: hidden; }
+  .slide.active { display: flex; animation: in .35s ease; }
+  @keyframes in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  .kicker { font-size: 14px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); font-weight: 600; }
+  h1 { font-size: 64px; line-height: 1.1; margin: 0; font-weight: 700; }
+  h2 { font-size: 38px; margin: 0; font-weight: 700; line-height: 1.2; }
+  .lead { font-size: 21px; color: var(--muted); line-height: 1.5; margin: 0; max-width: 1050px; }
+  .accent { color: var(--gold); }
+  ul.points { margin: 0; padding-left: 24px; display: grid; gap: 12px; font-size: 20px; line-height: 1.45; }
+  ul.points li::marker { color: var(--gold); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; min-height: 0; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; }
+  .card h3 { margin: 0 0 8px; font-size: 19px; }
+  .card p { margin: 0; color: var(--muted); font-size: 16px; line-height: 1.45; }
+  .card.gold { border-color: #6b5a32; background: #1f1b12; }
+  .big { font-size: 46px; font-weight: 700; color: var(--gold); line-height: 1; }
+  .big + span { display: block; margin-top: 6px; color: var(--muted); font-size: 15px; }
+  table { width: 100%; border-collapse: collapse; font-size: 16px; }
+  th { text-align: left; color: var(--muted); font-weight: 600; font-size: 13px; letter-spacing: .06em; text-transform: uppercase;
+    padding: 8px 10px; border-bottom: 1px solid var(--border-hi); }
+  td { padding: 9px 10px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.4; }
+  td:first-child { font-weight: 600; white-space: nowrap; }
+  code { font-family: ui-monospace, Consolas, monospace; font-size: .88em; background: #101013; border: 1px solid var(--border);
+    border-radius: 6px; padding: 1px 6px; color: #e9d5a6; }
+  .fig { flex: 1; min-height: 0; display: grid; place-items: center; }
+  .fig img { max-width: 100%; max-height: 480px; object-fit: contain; border-radius: 12px; background: #fff; padding: 10px; }
+  .fig.tall img { max-height: 530px; }
+  /* n8n editor screenshots: picture left, what to look at right */
+  .shot { display: grid; grid-template-columns: 860px 1fr; gap: 26px; flex: 1; min-height: 0; align-items: center; }
+  .shot img { width: 860px; max-height: 484px; object-fit: contain; border-radius: 10px; border: 1px solid var(--border-hi); background: #fff; }
+  .shot ul { margin: 0; padding-left: 20px; display: grid; gap: 10px; font-size: 16.5px; line-height: 1.45; color: var(--text); }
+  .shot ul li::marker { color: var(--gold); }
+  .shot .src { font-size: 13px; color: var(--faint); margin-top: 10px; }
+  .shot img, .fig img { cursor: zoom-in; }
+  /* image viewer: wheel = zoom at cursor, drag = pan */
+  .viewer { position: fixed; inset: 0; z-index: 10; background: #000f; overflow: hidden; cursor: grab; touch-action: none; }
+  .viewer.dragging { cursor: grabbing; }
+  .viewer img { position: absolute; left: 0; top: 0; transform-origin: 0 0; max-width: none; max-height: none;
+    background: #fff; user-select: none; -webkit-user-drag: none; image-rendering: auto; }
+  .viewer .bar { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); display: flex; gap: 6px; align-items: center;
+    background: #18181bee; border: 1px solid var(--border-hi); border-radius: 12px; padding: 6px; cursor: default; }
+  .viewer .bar button { background: var(--card); color: var(--text); border: 1px solid var(--border-hi); border-radius: 8px;
+    min-width: 38px; height: 34px; padding: 0 10px; font: inherit; font-size: 15px; cursor: pointer; }
+  .viewer .bar button:hover { border-color: var(--gold); }
+  .viewer .bar .pct { min-width: 58px; text-align: center; color: var(--muted); font-size: 14px; }
+  .viewer .hint { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); color: var(--muted); font-size: 13px;
+    background: #18181bcc; padding: 6px 12px; border-radius: 8px; pointer-events: none; }
+  /* live demo slides */
+  .demo { display: grid; grid-template-columns: 1.05fr 1fr; gap: 26px; flex: 1; min-height: 0; }
+  .demo h3 { margin: 0 0 10px; font-size: 15px; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); }
+  .time { display: inline-block; margin-left: 10px; font-size: 14px; font-weight: 600; color: var(--gold-ink); background: var(--gold);
+    border-radius: 999px; padding: 3px 12px; vertical-align: middle; }
+  .prompt { position: relative; background: #101013; border: 1px solid var(--border-hi); border-radius: 12px; padding: 14px 16px 14px;
+    font-family: inherit; font-size: 16px; line-height: 1.5; white-space: pre-wrap; color: #e9d5a6; max-height: 300px; overflow: auto; margin: 0; }
+  .prompt.mono { font-family: ui-monospace, Consolas, monospace; font-size: 13.5px; }
+  .tools { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+  .tools button, .tools a { background: var(--card); color: var(--text); border: 1px solid var(--border-hi); border-radius: 9px;
+    padding: 8px 14px; font: inherit; font-size: 15px; cursor: pointer; text-decoration: none; }
+  .tools button:hover, .tools a:hover { border-color: var(--gold); }
+  .tools .go { background: var(--gold); color: var(--gold-ink); border-color: var(--gold); font-weight: 600; }
+  ol.steps { margin: 0; padding-left: 22px; display: grid; gap: 9px; font-size: 17px; line-height: 1.45; }
+  ol.steps li::marker { color: var(--gold); font-weight: 700; }
+  .say { margin-top: 14px; border-left: 3px solid var(--gold); background: #1f1b12; border-radius: 0 10px 10px 0; padding: 10px 14px;
+    font-size: 16px; line-height: 1.45; color: var(--text); }
+  .say::before { content: '🎤 Nói: '; color: var(--gold); font-weight: 600; }
+  .chapter { justify-content: center; background: radial-gradient(800px 420px at 15% 90%, #2a2214 0%, transparent 60%), var(--bg); }
+  .tag { display: inline-block; font-size: 13px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--border-hi); color: var(--muted); }
+  .tag.ok { color: var(--ok); border-color: #2f5a3e; } .tag.wait { color: var(--warn); border-color: #6b5a32; }
+  .dept { border-left: 4px solid var(--c); }
+  .flow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 17px; }
+  .flow .step { background: var(--card); border: 1px solid var(--border-hi); border-radius: 10px; padding: 10px 14px; }
+  .flow .arrow { color: var(--gold); font-size: 22px; }
+  .foot { position: absolute; left: 72px; right: 72px; bottom: 22px; display: flex; justify-content: space-between;
+    font-size: 13px; color: var(--faint); }
+  .title-slide { justify-content: center; background:
+    radial-gradient(900px 500px at 85% 10%, #2a2214 0%, transparent 60%), var(--bg); }
+  .logo { width: 72px; height: 72px; border-radius: 18px; display: grid; place-items: center; font-size: 34px; font-weight: 700;
+    color: var(--gold); background: #0a0a0a; border: 1px solid var(--border-hi); }
+  /* chrome */
+  .progress { position: fixed; left: 0; top: 0; height: 3px; background: var(--gold); transition: width .3s; z-index: 5; }
+  .hud { position: fixed; right: 18px; bottom: 14px; display: flex; gap: 8px; align-items: center; z-index: 5;
+    font-size: 13px; color: var(--muted); opacity: .25; transition: opacity .2s; }
+  .hud:hover { opacity: 1; }
+  .hud button { background: var(--card); color: var(--text); border: 1px solid var(--border-hi); border-radius: 8px;
+    padding: 6px 12px; cursor: pointer; font: inherit; }
+  @media print {
+    html, body { overflow: visible; background: #fff; }
+    .viewport { position: static; display: block; } .stage { transform: none !important; width: auto; height: auto; }
+    .slide { display: flex !important; position: relative; width: 1280px; height: 720px; page-break-after: always; animation: none; }
+    .progress, .hud { display: none; }
+    @page { size: 1280px 720px; margin: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="viewport"><div class="stage" id="stage">
+
+  <!-- 1 -->
+  <section class="slide title-slide">
+    <div class="logo">W</div>
+    <div class="kicker">Báo cáo dự án · 10/2026</div>
+    <h1>AI Workforce<br><span class="accent">Công ty vận hành bằng nhân sự AI</span></h1>
+    <p class="lead">CEO AI nhận yêu cầu, lập kế hoạch, giao việc cho 8 agent ở 3 phòng ban, tự review rồi chờ con người duyệt. Xây trên n8n, PostgreSQL và Gemini, chạy local bằng Docker.</p>
+  </section>
+
+  <!-- 2 -->
+  <section class="slide">
+    <div class="kicker">Tổng quan</div>
+    <h2>Từ một câu yêu cầu đến sản phẩm đã được duyệt</h2>
+    <p class="lead">Hệ thống chia một yêu cầu tiếng Việt thành kế hoạch nhiều bước, chạy song song trên các agent chuyên môn và giữ mọi trạng thái trong database, nên chịu được restart, F5 và lỗi giữa chừng.</p>
+    <div class="card gold">
+      <h3>Ví dụ đã chạy thật</h3>
+      <p>"Xem video YouTube này, viết bài LinkedIn cho quản lý không chuyên kỹ thuật, chuyển thành kịch bản video ngắn và làm ảnh minh hoạ."</p>
+    </div>
+    <div class="flow">
+      <span class="step">CEO lập kế hoạch</span><span class="arrow">→</span>
+      <span class="step">YouTube-to-LinkedIn</span><span class="arrow">→</span>
+      <span class="step">Repurpose Studio ‖ Visual Design <small style="color:var(--muted)">(song song)</small></span><span class="arrow">→</span>
+      <span class="step">CEO review</span><span class="arrow">→</span>
+      <span class="step">Người duyệt</span>
+    </div>
+    <p class="lead" style="font-size:17px">Khoảng 5 phút, có một lần retry tự động khi Gemini trả về rỗng.</p>
+  </section>
+
+  <!-- 3 -->
+  <section class="slide">
+    <div class="kicker">Quy mô</div>
+    <h2>Những gì đã xây</h2>
+    <div class="grid4">
+      <div class="card"><div class="big">16</div><span>workflow n8n, sinh từ code</span></div>
+      <div class="card"><div class="big">8</div><span>agent AI ở 3 phòng ban</span></div>
+      <div class="card"><div class="big">13</div><span>bảng trong schema <code>wf</code></span></div>
+      <div class="card"><div class="big">~6.900</div><span>dòng code (không tính file sinh)</span></div>
+    </div>
+    <div class="grid2">
+      <table>
+        <tr><th>Lớp</th><th>Công nghệ</th></tr>
+        <tr><td>Điều phối</td><td>n8n 2.42.6, node AI Agent</td></tr>
+        <tr><td>AI</td><td>Gemini 3.5 Flash Lite + dự phòng 3.1</td></tr>
+        <tr><td>Database</td><td>PostgreSQL 16</td></tr>
+        <tr><td>Frontend</td><td>Node.js 22 + HTML/CSS/JS thuần</td></tr>
+        <tr><td>Vẽ ảnh</td><td>rough.js + resvg</td></tr>
+        <tr><td>Hạ tầng</td><td>Docker Compose, local</td></tr>
+      </table>
+      <table>
+        <tr><th>Thư mục</th><th>File</th><th>Dòng</th></tr>
+        <tr><td><code>workflows/</code></td><td>22</td><td>2.314</td></tr>
+        <tr><td><code>db/</code></td><td>12</td><td>1.941</td></tr>
+        <tr><td><code>dashboard/</code></td><td>7</td><td>1.908</td></tr>
+        <tr><td><code>tests/</code></td><td>8</td><td>373</td></tr>
+        <tr><td><code>renderer/</code></td><td>3</td><td>217</td></tr>
+        <tr><td><code>scripts/</code></td><td>4</td><td>151</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="slide">
+    <div class="kicker">Kiến trúc</div>
+    <h2>n8n điều phối, PostgreSQL giữ toàn bộ trạng thái</h2>
+    <div class="fig"><img src="images/project-report-architecture.png" alt="Sơ đồ kiến trúc"></div>
+  </section>
+
+  <!-- 5 -->
+  <section class="slide">
+    <div class="kicker">Luồng xử lý</div>
+    <h2>Mỗi yêu cầu qua CEO hai lần, chỉ xong khi người duyệt</h2>
+    <div class="grid2" style="grid-template-columns: 1.15fr 1fr; flex:1">
+      <div class="fig tall"><img src="images/project-report-request-flow.png" alt="Sơ đồ luồng một yêu cầu"></div>
+      <ul class="points" style="align-content:center">
+        <li>Kế hoạch sai được lưu với lý do và <b>không chạy gì</b>.</li>
+        <li>Dispatcher được đánh thức sau mỗi task; việc độc lập chạy song song.</li>
+        <li>Lỗi tạm thời tự thử lại, backoff 20 giây × số lần thử.</li>
+        <li>CEO review có thể tạo task sửa, số vòng có giới hạn.</li>
+        <li>Chỉ con người mới chuyển kế hoạch sang <code>completed</code>.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="slide">
+    <div class="kicker">Backend · Database</div>
+    <h2>PostgreSQL là nguồn sự thật duy nhất</h2>
+    <p class="lead">Mọi chuyển trạng thái đi qua hàm SQL; dashboard chỉ có một cửa <code>wf.api(action, args)</code>, lỗi trả về dưới dạng dữ liệu (400 / 404 / 409).</p>
+    <div class="grid2">
+      <table>
+        <tr><th>Nhóm bảng</th><th>Lưu gì</th></tr>
+        <tr><td>Tổ chức</td><td>phòng ban, agent, skill</td></tr>
+        <tr><td>Công việc</td><td>plans, tasks, phụ thuộc</td></tr>
+        <tr><td>Thực thi</td><td>executions, outputs, events</td></tr>
+        <tr><td>Con người</td><td>approvals, library_items</td></tr>
+        <tr><td>Bên ngoài</td><td>publications, integration_settings, knowledge</td></tr>
+      </table>
+      <ul class="points" style="font-size:18px">
+        <li><b>Không chạy trùng:</b> khoá dòng + điều kiện trạng thái + unique index.</li>
+        <li><b>Hàng đợi công ty:</b> việc CEO trước, mỗi agent 1 việc một lúc, không ngắt việc đang chạy.</li>
+        <li><b>Phòng ban:</b> DB chặn task giao cho agent ngoài phòng.</li>
+        <li><b>Trigger</b> từ chối mọi chuyển trạng thái không hợp lệ.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="slide">
+    <div class="kicker">Backend · n8n</div>
+    <h2>16 workflow, tất cả sinh từ code</h2>
+    <p class="lead" style="font-size:18px"><code>workflows/src</code> → <code>build-workflows.js</code> → import bằng CLI, ID cố định. Có version, review và test được; không sửa tay trong n8n.</p>
+    <table>
+      <tr><th>Workflow</th><th>Vai trò</th></tr>
+      <tr><td>A · CEO Planning</td><td>CEO Agent lập kế hoạch có cấu trúc, kiểm tra ID, agent, phụ thuộc, vòng lặp</td></tr>
+      <tr><td>B · Dispatcher + Runner</td><td>Lấy việc từ hàng đợi, chạy song song thật, ghi kết quả, retry</td></tr>
+      <tr><td>C · 8 Employee</td><td>Mỗi agent một workflow: kiểm tra đầu vào → prompt → AI → hậu kiểm</td></tr>
+      <tr><td>D · CEO Review</td><td>Nghiệm thu theo tiêu chí, tạo task sửa hoặc xin người duyệt</td></tr>
+      <tr><td>E · Dashboard API</td><td>18 webhook REST có khoá, gọi <code>wf.api()</code></td></tr>
+      <tr><td>F · LinkedIn · G · Check</td><td>Đăng bài đã duyệt · kiểm tra kết nối tài khoản ngoài</td></tr>
+    </table>
+  </section>
+
+  <!-- ───── Triển khai trong n8n: ảnh chụp editor thật (23/10/2026) ───── -->
+  <section class="slide chapter">
+    <div class="kicker">Phần tiếp theo</div>
+    <h1>Triển khai thực tế<br><span class="accent">bên trong n8n</span></h1>
+    <p class="lead">Ảnh chụp trực tiếp từ n8n đang chạy, ngày 23/10/2026: các workflow đã publish, từng bước xử lý và lịch sử chạy.</p>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">n8n · Tổng quan</div>
+    <h2>16 workflow của hệ thống, đều đã publish</h2>
+    <div class="shot">
+      <img src="images/n8n/01-workflows-list.png" alt="Danh sách workflow trong n8n">
+      <div><ul>
+        <li>Đặt tên theo vai trò: <b>A</b> lập kế hoạch, <b>B</b> điều phối, <b>C</b> agent, <b>D</b> review, <b>E</b> API, <b>F</b> LinkedIn, <b>G</b> kiểm tra kết nối.</li>
+        <li>Tất cả ở trạng thái <b>Published</b>, nghĩa là webhook và lịch chạy đang hoạt động.</li>
+        <li>Không tạo tay: script deploy sinh JSON từ code rồi import.</li>
+        <li>Con số 19 trên màn hình gồm thêm 3 workflow thử nghiệm đã gỡ publish.</li>
+      </ul><div class="src">n8n → Overview → Workflows</div></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">n8n · Bản đồ</div>
+    <h2>Workflow "0 · Architecture Overview": bản đồ cả hệ thống</h2>
+    <div class="shot">
+      <img src="images/n8n/02-architecture-map.png" alt="Bản đồ kiến trúc trong n8n">
+      <div><ul>
+        <li>Một canvas không chạy, chỉ để nhìn: yêu cầu → A → B → C, D, E, F.</li>
+        <li>Ba khung màu là ba phòng ban với agent của từng phòng.</li>
+        <li>Mỗi khối là link mở thẳng workflow thật.</li>
+      </ul><div class="src">workflow wf0Architecture1</div></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">n8n · Workflow A</div>
+    <h2>CEO Planning: từ câu yêu cầu thành kế hoạch</h2>
+    <div class="shot">
+      <img src="images/n8n/03-ceo-planning.png" alt="Workflow CEO Planning">
+      <div><ul>
+        <li><b>Business Request</b> (webhook) → kiểm tra yêu cầu.</li>
+        <li><b>Start Planning</b> ghi trạng thái "đang lập kế hoạch" vào DB.</li>
+        <li><b>CEO Planner Agent</b> với 2 model Gemini (chính + dự phòng) và Output Parser bắt buộc trả JSON đúng schema.</li>
+        <li><b>Validate Task Plan</b> kiểm tra agent, phụ thuộc, vòng lặp; sai thì <b>Record Rejected Plan</b>.</li>
+        <li>Hợp lệ → <b>Save Plan</b> → <b>Start Dispatcher</b>.</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">n8n · Workflow B</div>
+    <h2>Task Dispatcher: chia việc từ hàng đợi</h2>
+    <div class="shot">
+      <img src="images/n8n/04-dispatcher.png" alt="Workflow Task Dispatcher">
+      <div><ul>
+        <li>Hai cách kích hoạt: <b>Dispatch Request</b> (được đánh thức) và <b>Every Minute</b> (lưới an toàn).</li>
+        <li><b>Refresh Plan</b> → <b>Claim Ready Tasks</b>: PostgreSQL khoá và nhận task sẵn sàng, không bao giờ trùng.</li>
+        <li><b>Run Task</b> gọi Task Runner kiểu fire-and-forget nên task chạy song song thật.</li>
+        <li>Đủ điều kiện thì <b>Start CEO Review</b>.</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">n8n · Workflow B</div>
+    <h2>Task Runner: chạy đúng một task và ghi kết quả</h2>
+    <div class="shot">
+      <img src="images/n8n/05-task-runner.png" alt="Workflow Task Runner">
+      <div><ul>
+        <li><b>Begin Task Run</b> tạo một lần thực thi trong DB.</li>
+        <li><b>Call Employee Workflow</b> gọi workflow của agent được giao.</li>
+        <li><b>Succeeded?</b> → <b>Record Completion</b> hoặc <b>Record Failure</b> (DB quyết định có thử lại không).</li>
+        <li><b>Wake Dispatcher</b> để chạy ngay task tiếp theo.</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">n8n · Workflow C · Agent 1/8 · Marketing</div>
+    <h2>YouTube-to-LinkedIn: xem video, viết bài</h2>
+    <div class="shot">
+      <img src="images/n8n/06-employee-youtube.png" alt="Workflow agent YouTube-to-LinkedIn">
+      <div><ul>
+        <li>Khuôn chung của mọi agent: <b>Validate Task Input</b> → công cụ → <b>Build Prompt</b> → AI Agent → <b>Post-process</b>.</li>
+        <li><b>Fetch YouTube Metadata</b> lấy tiêu đề thật; <b>Transcribe YouTube Video</b> nhờ Gemini xem video khi chưa có transcript.</li>
+        <li>Lỗi đầu vào hoặc lỗi AI trả về kết quả "failed" rõ ràng.</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">n8n · Workflow C · Agent 2/8 · Marketing</div>
+    <h2>Repurpose Studio: một nguồn, nhiều định dạng</h2>
+    <div class="shot">
+      <img src="images/n8n/13-employee-repurpose.png" alt="Workflow agent Repurpose Studio">
+      <div><ul>
+        <li>Khuôn cơ bản nhất: <b>Validate Task Input</b> → <b>Repurpose Studio Agent</b> → <b>Post-process Output</b>.</li>
+        <li>Đầu vào là nội dung nguồn hoặc <b>kết quả của bước trước</b> (ví dụ bài LinkedIn vừa viết), Task Runner tự chuyển sang.</li>
+        <li>Trả về nhiều bản: kịch bản video ngắn, tóm tắt, outline…, giữ chung một thông điệp.</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">n8n · Workflow C · Agent 3/8 · Marketing</div>
+    <h2>Visual Design: vẽ ảnh thật</h2>
+    <div class="shot">
+      <img src="images/n8n/07-employee-visual.png" alt="Workflow agent Visual Design">
+      <div><ul>
+        <li><b>Visual Design Agent</b> viết spec thẻ ảnh từ nội dung nguồn.</li>
+        <li><b>Render Card</b> gọi service nội bộ <code>wf-renderer</code> để vẽ PNG phong cách phác tay.</li>
+        <li>Vẽ được thì <b>Attach Image</b>; lỗi thì <b>Image Not Rendered</b> báo rõ.</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">n8n · Workflow C · Agent 4/8 · Vận hành</div>
+    <h2>WeCommitDW System Checker: đọc log, tìm rủi ro</h2>
+    <div class="shot">
+      <img src="images/n8n/14-employee-wecommitdw.png" alt="Workflow agent WeCommitDW System Checker">
+      <div><ul>
+        <li><b>Validate Task Input</b> bắt buộc phải có dữ liệu hệ thống (log, báo cáo); thiếu thì <b>Return Validation Failure</b>, không đoán mò.</li>
+        <li><b>Post-process Output</b> đối chiếu từng trích dẫn với dữ liệu gốc và gắn cờ <code>evidence_verified</code>.</li>
+        <li>Mỗi phát hiện có mức độ nghiêm trọng và cách khắc phục.</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">n8n · Workflow C · Agent 5/8 · Vận hành</div>
+    <h2>Skill Recommendation: đề xuất đúng người</h2>
+    <div class="shot">
+      <img src="images/n8n/15-employee-skill.png" alt="Workflow agent Skill Recommendation">
+      <div><ul>
+        <li><b>Load Employee Catalog</b> đọc danh mục 8 agent và skill thật từ PostgreSQL.</li>
+        <li><b>Build Prompt</b> đưa danh mục vào cho AI chọn.</li>
+        <li><b>Post-process Output</b> loại agent hoặc skill không có trong danh mục, ghi vào "khoảng trống năng lực".</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">n8n · Workflow C · Agent 6/8 · CSKH &amp; Cộng đồng</div>
+    <h2>Circle Community Checker: soát cộng đồng</h2>
+    <div class="shot">
+      <img src="images/n8n/16-employee-circle.png" alt="Workflow agent Circle Community Checker">
+      <div><ul>
+        <li>Nhận các thread được dán vào; phân loại, xếp ưu tiên.</li>
+        <li>Soạn <b>trả lời nháp</b> (không tự đăng) và đánh dấu việc cần chuyển người, như tranh chấp thanh toán.</li>
+        <li>Bước tiếp theo khi có token: thêm node đọc Circle Admin API trước <b>Validate Task Input</b>.</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">n8n · Workflow C · Agent 7/8 · CSKH &amp; Cộng đồng</div>
+    <h2>Coaching Timeline: chương và highlight</h2>
+    <div class="shot">
+      <img src="images/n8n/17-employee-coaching.png" alt="Workflow agent Coaching Timeline">
+      <div><ul>
+        <li><b>Validate Task Input</b> yêu cầu transcript có mốc giờ.</li>
+        <li>AI chia chương, chọn đoạn highlight, ghi chú cho người dựng video.</li>
+        <li><b>Post-process Output</b> loại mọi mốc giờ không có trong transcript.</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">n8n · Workflow C · Agent 8/8 · CSKH &amp; Cộng đồng</div>
+    <h2>Knowledge &amp; Support: trả lời có nguồn</h2>
+    <div class="shot">
+      <img src="images/n8n/18-employee-knowledge.png" alt="Workflow agent Knowledge &amp; Support">
+      <div><ul>
+        <li><b>Search Knowledge Base</b> tìm full-text trong các bài viết đã duyệt (PostgreSQL).</li>
+        <li>AI chỉ trả lời từ nguồn tìm được và trích nguồn.</li>
+        <li>Không có nguồn → <b>chuyển người xử lý</b> thay vì đoán. Kho tri thức hiện đang trống nên luôn chuyển.</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">n8n · Workflow D</div>
+    <h2>CEO Review: nghiệm thu trước khi trình người duyệt</h2>
+    <div class="shot">
+      <img src="images/n8n/08-ceo-review.png" alt="Workflow CEO Review">
+      <div><ul>
+        <li><b>Load Review Context</b> nạp kết quả mọi task.</li>
+        <li><b>CEO Reviewer Agent</b> chấm theo tiêu chí nghiệm thu; <b>Enforce Review Rules</b> giới hạn số vòng sửa.</li>
+        <li><b>Revise?</b> → <b>Add Revision Tasks</b> (chạy lại) hoặc <b>Finalize Review</b> (chờ người duyệt).</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">n8n · Workflow E</div>
+    <h2>Dashboard API: 18 webhook phục vụ giao diện</h2>
+    <div class="shot">
+      <img src="images/n8n/09-dashboard-api.png" alt="Workflow Dashboard API">
+      <div><ul>
+        <li>Mỗi hàng là một endpoint: webhook có khoá → một câu <code>wf.api(...)</code>.</li>
+        <li>Tất cả gom về <b>Shape Response</b> → <b>Respond</b>, trả JSON thống nhất <code>{ ok, data, error }</code>.</li>
+        <li>Retry và duyệt có nhánh phụ để đánh thức dispatcher.</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">n8n · Workflow F</div>
+    <h2>LinkedIn Publisher: đăng đúng bản đã duyệt</h2>
+    <div class="shot">
+      <img src="images/n8n/10-linkedin-publisher.png" alt="Workflow LinkedIn Publisher">
+      <div><ul>
+        <li><b>Has Image?</b> → <b>Read Image</b> từ ổ đĩa; thiếu file thì dừng và báo lỗi.</li>
+        <li><b>Get LinkedIn Member</b> lấy tài khoản đã kết nối.</li>
+        <li><b>Create Post With Image</b> hoặc <b>Create Text Post</b>, rồi <b>Record Publication</b> ghi link bài hoặc lỗi.</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">n8n · Workflow G</div>
+    <h2>Integration Check: thử kết nối tài khoản ngoài</h2>
+    <div class="shot">
+      <img src="images/n8n/11-integration-check.png" alt="Workflow Integration Check">
+      <div><ul>
+        <li><b>Route</b> chọn đúng một nhánh: LinkedIn, Circle, PostgreSQL, MySQL, SQL Server hoặc HTTP API.</li>
+        <li>Mỗi nhánh chỉ gọi một lệnh đọc.</li>
+        <li><b>Connected</b> / <b>Not Connected</b> giải thích nguyên nhân, <b>Record Test</b> lưu kết quả cho trang Kết nối.</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">n8n · Vận hành</div>
+    <h2>Lịch sử chạy: dispatcher tự kiểm tra mỗi phút</h2>
+    <div class="shot">
+      <img src="images/n8n/12-executions.png" alt="Danh sách executions trong n8n">
+      <div><ul>
+        <li>Mỗi phút <b>B · Task Dispatcher</b> chạy một lần để nhặt việc bị lỡ và execution bị kẹt.</li>
+        <li>Mỗi lần chỉ mất vài chục mili giây khi không có việc.</li>
+        <li>Khi có yêu cầu, các workflow A, B, C, D xuất hiện ở đây kèm trạng thái từng lần chạy.</li>
+      </ul><div class="src">n8n → Overview → Executions</div></div>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="slide">
+    <div class="kicker">Đội ngũ AI</div>
+    <h2>8 agent, nguyên tắc chung: <span class="accent">không bịa</span></h2>
+    <div class="grid3" style="flex:1">
+      <div class="card dept" style="--c:var(--mkt)"><h3>📣 Marketing</h3>
+        <p><b>YouTube-to-LinkedIn</b>: xem video, viết bài ≤ 3.000 ký tự<br><br><b>Repurpose Studio</b>: kịch bản video, tóm tắt, outline<br><br><b>Visual Design</b>: thẻ ảnh phác tay PNG, chỉ dùng ý từ nguồn</p></div>
+      <div class="card dept" style="--c:var(--ops)"><h3>⚙️ Vận hành</h3>
+        <p><b>WeCommitDW Checker</b>: lỗi và rủi ro từ log, mỗi phát hiện kèm trích dẫn đã đối chiếu<br><br><b>Skill Recommendation</b>: đề xuất agent và skill, chỉ chọn trong danh mục thật</p></div>
+      <div class="card dept" style="--c:var(--cs)"><h3>💬 CSKH &amp; Cộng đồng</h3>
+        <p><b>Circle Checker</b>: phân loại thread, trả lời nháp<br><br><b>Coaching Timeline</b>: chương và highlight, loại mốc giờ không có thật<br><br><b>Knowledge &amp; Support</b>: không có nguồn thì chuyển người</p></div>
+    </div>
+    <p class="lead" style="font-size:17px">5 kịch bản demo gửi CEO (dữ liệu dán trong câu lệnh) đều được giao đúng agent và chạy xong.</p>
+  </section>
+
+  <!-- 9 -->
+  <section class="slide">
+    <div class="kicker">Frontend · Dashboard</div>
+    <h2>Một trang điều hành cho CEO và từng phòng ban</h2>
+    <div class="grid2" style="flex:1">
+      <div class="card"><h3>🏠 Điều hành</h3><p>Ô giao việc kèm tài liệu, banner "CEO đang lập kế hoạch" giữ qua F5, khu chờ duyệt, tiến độ kế hoạch, thẻ từng agent với đồng hồ, hàng chờ, lỗi + Thử lại, ô "Giao lại".</p></div>
+      <div class="card"><h3>📚 Thư viện nội dung</h3><p>Mọi kết quả theo phòng ban; lọc, tìm, đánh dấu Mới → Đã dùng → Lưu trữ; xem dễ đọc, sao chép, tải .md, tải ảnh.</p></div>
+      <div class="card"><h3>🗂️ Kế hoạch &amp; LinkedIn</h3><p>Các bước, báo cáo CEO, duyệt/từ chối, xem trước bài LinkedIn đúng chữ và ảnh sẽ đăng.</p></div>
+      <div class="card"><h3>⚙️ Kết nối &amp; tài khoản</h3><p>Nhập LinkedIn, Circle, WeCommitDW ngay trên app, kèm nút Kiểm tra kết nối gọi thật.</p></div>
+    </div>
+    <p class="lead" style="font-size:17px">Không framework, không build. Server Node giữ API key phía máy chủ và chỉ cho đi qua danh sách endpoint cho phép.</p>
+  </section>
+
+  <!-- 10 -->
+  <section class="slide">
+    <div class="kicker">Tích hợp</div>
+    <h2>Ba dịch vụ chạy thật, ba dịch vụ chờ tài khoản</h2>
+    <table>
+      <tr><th>Dịch vụ</th><th>Trạng thái</th><th>Ghi chú</th></tr>
+      <tr><td>Gemini</td><td><span class="tag ok">Chạy thật</span></td><td>Gói miễn phí: dùng model lite, có model dự phòng</td></tr>
+      <tr><td>YouTube</td><td><span class="tag ok">Chạy thật</span></td><td>oEmbed + Gemini xem video công khai</td></tr>
+      <tr><td>Vẽ ảnh</td><td><span class="tag ok">Chạy thật</span></td><td>Service nội bộ, không cần AI tạo ảnh</td></tr>
+      <tr><td>LinkedIn</td><td><span class="tag wait">Chờ app + Connect</span></td><td>Chỉ đăng bài đã duyệt, một lần mỗi kế hoạch</td></tr>
+      <tr><td>Circle</td><td><span class="tag wait">Chờ token</span></td><td>Đã gọi thử Admin API v2 thật (401 khi chưa có token)</td></tr>
+      <tr><td>WeCommitDW</td><td><span class="tag wait">Chờ kết nối</span></td><td>PostgreSQL / MySQL / SQL Server / HTTP API, chỉ đọc</td></tr>
+    </table>
+  </section>
+
+  <!-- 11 -->
+  <section class="slide">
+    <div class="kicker">Bảo mật</div>
+    <h2>Bí mật chỉ nằm trong kho credential mã hoá của n8n</h2>
+    <ul class="points">
+      <li>Token và mật khẩu nhập trên app được ghi thẳng vào n8n, <b>không bao giờ hiển thị lại</b> và không lưu trong database.</li>
+      <li>Database từ chối mọi trường lạ, nên mật khẩu gõ nhầm ô không thể lọt vào.</li>
+      <li>Mọi webhook có khoá <code>X-API-Key</code>; trình duyệt không bao giờ thấy khoá.</li>
+      <li>Mọi cổng chỉ mở trên <code>127.0.0.1</code>; kiểm tra kết nối chỉ đọc.</li>
+      <li>Không tự đăng ra ngoài: LinkedIn cần duyệt + xác nhận; trả lời khách chỉ là bản nháp.</li>
+      <li style="color:var(--warn)">Còn thiếu: đăng nhập và phân quyền theo phòng ban cho dashboard.</li>
+    </ul>
+  </section>
+
+  <!-- 12 -->
+  <section class="slide">
+    <div class="kicker">Chất lượng</div>
+    <h2>Đã kiểm thử ở mọi tầng</h2>
+    <div class="grid4">
+      <div class="card"><div class="big">14</div><span>kịch bản máy trạng thái DB</span></div>
+      <div class="card"><div class="big">0</div><span>lần chạy trùng khi 8 phiên tranh 6 task</span></div>
+      <div class="card"><div class="big">20/20</div><span>test logic node Code</span></div>
+      <div class="card"><div class="big">8/8</div><span>agent chạy thật trên Gemini</span></div>
+    </div>
+    <ul class="points" style="font-size:18px">
+      <li>5/5 yêu cầu demo gửi CEO được giao đúng agent.</li>
+      <li>Test thư viện và cài đặt kết nối; thử tay trên trình duyệt không lỗi JS.</li>
+      <li>Tắt database: API trả 503 có giải thích và tự hồi phục khi DB chạy lại.</li>
+    </ul>
+  </section>
+
+  <!-- 13 -->
+  <section class="slide">
+    <div class="kicker">Vận hành</div>
+    <h2>Một lệnh để chạy, một lệnh để deploy</h2>
+    <div class="grid2">
+      <table>
+        <tr><th>Container</th><th>Cổng</th></tr>
+        <tr><td>n8n</td><td>5678</td></tr>
+        <tr><td>wf-postgres</td><td>5433</td></tr>
+        <tr><td>wf-dashboard</td><td>3000</td></tr>
+        <tr><td>wf-renderer</td><td>nội bộ</td></tr>
+      </table>
+      <div class="card">
+        <h3><code>deploy-workforce.ps1</code></h3>
+        <p>1. Sinh workflow + seed tổ chức<br>2. Áp SQL theo thứ tự (idempotent)<br>3. Tạo credential giữ chỗ, không ghi đè cái đã nhập<br>4. Import + publish (retry 3 lần)<br>5. Restart n8n, chờ sẵn sàng</p>
+      </div>
+    </div>
+    <p class="lead" style="font-size:17px">Chạy local nên không tốn phí cloud. Lưu ý máy: giữ ổ C trống trên 10 GB để Docker khởi động ổn định.</p>
+  </section>
+
+  <!-- 14 -->
+  <section class="slide">
+    <div class="kicker">Tiếp theo</div>
+    <h2>Lõi đã chạy ổn, còn lại chủ yếu là tài khoản và quyết định</h2>
+    <div class="grid2">
+      <div class="card"><h3>Hạn chế hiện tại</h3><p>• Gemini gói miễn phí, đôi khi 503<br>• Kho tri thức còn trống<br>• Dashboard chưa có đăng nhập<br>• Huỷ kế hoạch không dừng execution đang chạy<br>• Chưa sửa nội dung trong thư viện</p></div>
+      <div class="card gold"><h3>Bước tiếp theo</h3><p>• Kết nối LinkedIn và đăng thử bài thật<br>• Nhập Circle + WeCommitDW, cho agent đọc dữ liệu thật<br>• Nạp tài liệu chính sách, FAQ vào kho tri thức<br>• Thay Gemini key, cân nhắc bật billing<br>• Thêm đăng nhập và phân quyền theo phòng ban</p></div>
+    </div>
+  </section>
+
+  <!-- ───── Demo trực tiếp ───── -->
+  <section class="slide chapter">
+    <div class="kicker">Phần cuối · khoảng 12 phút</div>
+    <h1>Demo <span class="accent">trực tiếp</span></h1>
+    <div class="grid2" style="margin-top:8px">
+      <ul class="points" style="font-size:18px">
+        <li><b>1.</b> CEO giao việc cho 3 agent (YouTube → LinkedIn → video, ảnh)</li>
+        <li><b>2.</b> Phòng Vận hành kiểm tra log hệ thống</li>
+        <li><b>3.</b> Hỏi CEO "ai nên làm việc này"</li>
+        <li><b>4.</b> Xem kết quả và duyệt</li>
+      </ul>
+      <ul class="points" style="font-size:18px">
+        <li><b>5.</b> Thư viện nội dung và Kết nối tài khoản</li>
+        <li><b>6.</b> Hậu trường trong n8n</li>
+        <li style="color:var(--muted)">Nguyên tắc: gửi việc chạy lâu trước, trình bày trong lúc chờ.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Demo · Chuẩn bị (người trình bày, trước 20 phút)</div>
+    <h2>Checklist trước khi demo</h2>
+    <div class="grid2">
+      <ul class="points" style="font-size:17px">
+        <li>Ổ C trống trên 10 GB; đóng ChatGPT desktop và tab thừa.</li>
+        <li>Mở Docker Desktop → <code>docker compose up -d</code>.</li>
+        <li>Dashboard mở được, cuối trang ghi "Đã kết nối n8n".</li>
+        <li><b>Chạy thử Gemini một lần</b>: ô "Giao lại" của agent Skill Recommendation, chờ thẻ báo "xong".</li>
+      </ul>
+      <ul class="points" style="font-size:17px">
+        <li>Lần đầu thao tác, nhập tên người trình bày khi dashboard hỏi.</li>
+        <li>Đăng nhập sẵn n8n ở một tab riêng.</li>
+        <li>Bấm <b>Dọn hết</b> ở "Kết quả gần đây" cho màn hình sạch.</li>
+        <li>Slide toàn màn hình: phím <code>F</code>.</li>
+      </ul>
+    </div>
+    <div class="tools"><a class="go" href="http://localhost:3000/#ceo" target="_blank" rel="noopener">Mở dashboard ↗</a>
+      <a href="http://localhost:5678/home/executions" target="_blank" rel="noopener">Mở n8n ↗</a></div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Demo 1 · Tab Tổng quan · CEO</div>
+    <h2>CEO giao việc cho nhiều agent <span class="time">~5 phút · gửi ngay</span></h2>
+    <div class="demo">
+      <div>
+        <h3>Dán vào ô giao việc → Gửi</h3>
+        <pre class="prompt">Xem video https://www.youtube.com/watch?v=aircAruvnKk rồi viết một bài LinkedIn bằng tiếng Việt cho quản lý không chuyên kỹ thuật. Từ bài viết đó, chuyển thể thêm thành kịch bản video ngắn và một bản tóm tắt. Đồng thời làm một ảnh phong cách sketch minh hoạ ý chính để đăng kèm bài LinkedIn.</pre>
+        <div class="tools"><button type="button" data-copy-prompt>⧉ Sao chép câu lệnh</button>
+          <a class="go" href="http://localhost:3000/#ceo" target="_blank" rel="noopener">Mở tab CEO ↗</a></div>
+      </div>
+      <div>
+        <h3>Chỉ cho khán giả</h3>
+        <ol class="steps">
+          <li>Banner "CEO đang lập kế hoạch…", ô nhập bị khoá. Bấm F5: banner vẫn còn.</li>
+          <li>Sau 20–40 giây: "Đã giao Marketing" với 3 agent.</li>
+          <li>YouTube-to-LinkedIn chạy trước; Repurpose và Visual Design <b>chờ</b> bài viết.</li>
+          <li>Thẻ agent sáng viền vàng, "Đang suy luận… m:ss".</li>
+        </ol>
+        <div class="say">CEO không tự làm. Nó chọn agent theo kỹ năng và tự biết việc nào phải làm trước.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Demo 2 · Tab Vận hành</div>
+    <h2>Phòng ban chỉ giao việc trong phạm vi <span class="time">1–2 phút</span></h2>
+    <div class="demo">
+      <div>
+        <h3>Dán vào ô giao việc → Gửi</h3>
+        <pre class="prompt mono">Kiểm tra giúp tôi tình trạng hệ thống WeCommitDW từ log đêm qua, chỉ ra lỗi, rủi ro và cách khắc phục:
+02:00 ETL job dw_sales_load started
+02:47 ETL job dw_sales_load finished rows=1,204,331 (avg 7 ngày: 1,190,000)
+03:00 ETL job dw_customer_sync started
+03:00 ERROR dw_customer_sync: connection timeout to crm-replica (attempt 1/3)
+03:05 ERROR dw_customer_sync: connection timeout to crm-replica (attempt 2/3)
+03:10 dw_customer_sync finished rows=0
+Disk usage /data: 91% (threshold 85%)
+Backup job: last successful run 2026-10-10</pre>
+        <div class="tools"><button type="button" data-copy-prompt>⧉ Sao chép câu lệnh</button>
+          <a class="go" href="http://localhost:3000/#dept_operations" target="_blank" rel="noopener">Mở tab Vận hành ↗</a></div>
+      </div>
+      <div>
+        <h3>Chỉ cho khán giả</h3>
+        <ol class="steps">
+          <li>Header thành "Phòng Vận hành", chỉ còn 2 agent của phòng.</li>
+          <li>Phòng lập kế hoạch riêng, không chặn việc CEO đang chạy.</li>
+          <li>Việc được giao cho <b>WeCommitDW System Checker</b>.</li>
+          <li><i>Tuỳ chọn:</i> gửi "Viết một bài LinkedIn giới thiệu hệ thống WeCommitDW" → bị từ chối, gợi ý giao Marketing.</li>
+        </ol>
+        <div class="say">Phòng ban không giao được việc cho agent phòng khác, chặn tận ở database.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Demo 3 · Tab Tổng quan · CEO</div>
+    <h2>Hỏi CEO "ai nên làm việc này" <span class="time">~1 phút</span></h2>
+    <div class="demo">
+      <div>
+        <h3>Dán vào ô giao việc → Gửi</h3>
+        <pre class="prompt">Tôi chưa biết nên giao việc này cho ai: cần soát các bình luận khách hàng phàn nàn video bài 5 không phát được trên Safari và soạn câu trả lời. Hãy đề xuất nhân sự và kỹ năng phù hợp, kèm các bước thực hiện.</pre>
+        <div class="tools"><button type="button" data-copy-prompt>⧉ Sao chép câu lệnh</button>
+          <a class="go" href="http://localhost:3000/#ceo" target="_blank" rel="noopener">Mở tab CEO ↗</a></div>
+      </div>
+      <div>
+        <h3>Chỉ cho khán giả</h3>
+        <ol class="steps">
+          <li>CEO giao cho <b>Skill Recommendation</b>, không tự đi làm việc đó.</li>
+          <li>Kết quả: agent được đề xuất, kỹ năng, các bước, khoảng trống năng lực.</li>
+        </ol>
+        <div class="say">Agent chỉ đề xuất trong danh mục nhân sự thật; agent hay kỹ năng không tồn tại bị lọc bỏ.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Demo 4 · Kết quả và duyệt</div>
+    <h2>Xem kết quả, CEO báo cáo, người duyệt <span class="time">~3 phút</span></h2>
+    <div class="demo">
+      <div>
+        <h3>Kết quả Demo 2</h3>
+        <ol class="steps">
+          <li>"Kết quả gần đây" → <b>Xem</b> kết quả WeCommitDW.</li>
+          <li>Mỗi phát hiện có <b>trích dẫn log gốc</b> và dấu "✓ bằng chứng khớp dữ liệu".</li>
+        </ol>
+        <div class="say">Agent không được bịa: mọi trích dẫn được đối chiếu lại với dữ liệu gốc.</div>
+      </div>
+      <div>
+        <h3>Kế hoạch Demo 1 (khi báo "chờ duyệt")</h3>
+        <ol class="steps">
+          <li>"Chờ bạn duyệt" → <b>Xem</b>: các bước, <b>Báo cáo của CEO</b>.</li>
+          <li><b>Xem trước bài LinkedIn</b>: đúng chữ và ảnh sẽ đăng.</li>
+          <li>Bấm <b>✓ Duyệt</b>.</li>
+          <li>Nút "Đăng lên LinkedIn" hiện ra: <b>không bấm</b> (chưa kết nối LinkedIn).</li>
+        </ol>
+        <div class="say">CEO không tự đánh dấu xong; chỉ người duyệt mới chốt. Đăng LinkedIn đúng bản vừa xem, một lần duy nhất.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Demo 5 · Thư viện và Kết nối</div>
+    <h2>Quản lý nội dung và tài khoản ngay trên app <span class="time">~1,5 phút</span></h2>
+    <div class="demo">
+      <div>
+        <h3>📚 Thư viện nội dung</h3>
+        <ol class="steps">
+          <li>Lọc theo agent, trạng thái duyệt; tìm "Safari".</li>
+          <li>Mở kết quả Repurpose: nút <b>Sao chép</b> từng phần, <b>Tải .md</b>.</li>
+          <li><b>✓ Đã dùng</b> một thẻ → F5 → trạng thái còn nguyên.</li>
+          <li>Chuyển tab Marketing: chỉ còn nội dung của phòng.</li>
+        </ol>
+        <div class="tools"><a class="go" href="http://localhost:3000/#ceo/library" target="_blank" rel="noopener">Mở Thư viện ↗</a></div>
+      </div>
+      <div>
+        <h3>⚙️ Kết nối &amp; tài khoản</h3>
+        <ol class="steps">
+          <li>Thẻ LinkedIn, Circle, WeCommitDW có hướng dẫn từng bước.</li>
+          <li><b>Kiểm tra kết nối</b> ở thẻ Circle → lỗi 401 từ máy chủ Circle thật.</li>
+        </ol>
+        <div class="say">Token nhập ở đây đi thẳng vào kho credential mã hoá của n8n, không bao giờ hiện lại.</div>
+        <div class="tools"><a class="go" href="http://localhost:3000/#settings" target="_blank" rel="noopener">Mở Kết nối ↗</a></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Demo 6 · Tab n8n</div>
+    <h2>Hậu trường: xem lại đúng lần chạy vừa rồi <span class="time">~2 phút</span></h2>
+    <div class="demo">
+      <div>
+        <ol class="steps">
+          <li><b>Executions</b>: các lần chạy của Demo 1 nằm trên cùng (A, B, C, D).</li>
+          <li>Mở execution <b>C · YouTube-to-LinkedIn Agent</b> → bấm node <b>Transcribe YouTube Video</b> xem transcript Gemini trả về.</li>
+          <li>Bấm <b>Post-process Output</b> xem bài viết cuối cùng.</li>
+          <li>Mở workflow <b>A · CEO Planning</b>: chỉ CEO Planner Agent, 2 model Gemini và Output Parser.</li>
+        </ol>
+        <div class="tools"><a class="go" href="http://localhost:5678/home/executions" target="_blank" rel="noopener">Mở Executions ↗</a>
+          <a href="http://localhost:5678/workflow/wfaCeoPlanning01" target="_blank" rel="noopener">Mở workflow A ↗</a></div>
+      </div>
+      <div>
+        <div class="say">16 workflow này sinh ra từ code và deploy bằng một lệnh, không ai kéo thả tay.</div>
+        <p class="lead" style="font-size:16px;margin-top:16px">Nếu n8n không mở được: dùng các slide ảnh chụp n8n ở phần "Triển khai thực tế".</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Demo · Dự phòng</div>
+    <h2>Nếu có sự cố khi demo</h2>
+    <table>
+      <tr><th>Tình huống</th><th>Xử lý tại chỗ</th></tr>
+      <tr><td>Gemini báo 429 / 503</td><td>Bấm <b>↻ Thử lại</b> một lần (hệ thống cũng tự thử lại). Vẫn lỗi → mở Thư viện, xem kết quả lần chạy trước.</td></tr>
+      <tr><td>YouTube trả rỗng</td><td>Hệ thống tự retry, thường lần 2 thành công. Dùng làm ví dụ về retry.</td></tr>
+      <tr><td>Demo 1 quá 8 phút</td><td>Làm tiếp Demo 5–6 trong lúc chờ, hoặc mở kế hoạch YouTube cũ từ nút 🕘 Lịch sử.</td></tr>
+      <tr><td>"Không kết nối được database"</td><td><code>docker compose up -d</code>, chờ 20 giây, F5.</td></tr>
+      <tr><td>Docker không lên</td><td><code>wsl --shutdown</code>, mở lại Docker Desktop. Không kịp: trình bày bằng slide ảnh chụp n8n.</td></tr>
+      <tr><td>Lỡ bấm Dừng kế hoạch</td><td>Gửi lại câu lệnh; kết quả cũ vẫn ở Thư viện.</td></tr>
+    </table>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Hỏi đáp · trả lời nhanh</div>
+    <h2>Câu hỏi thường gặp</h2>
+    <div class="grid2">
+      <div class="card"><h3>Agent có bịa không?</h3><p>Hai lớp chặn: prompt cấm, và code hậu kiểm loại trích dẫn, mốc giờ, agent không có trong nguồn. Không có nguồn thì chuyển người xử lý.</p></div>
+      <div class="card"><h3>Hai việc chạy trùng?</h3><p>Không. PostgreSQL khoá dòng, mỗi task chỉ một lần chạy; test 8 phiên tranh 6 task: 0 trùng.</p></div>
+      <div class="card"><h3>Sập giữa chừng?</h3><p>Trạng thái nằm trong database; dispatcher mỗi phút nhặt việc kẹt, quá 15 phút thì timeout và thử lại.</p></div>
+      <div class="card"><h3>Thêm agent mới?</h3><p>Thêm một module trong <code>workflows/src/employees/</code> rồi deploy; CEO tự thấy agent mới.</p></div>
+    </div>
+  </section>
+
+  <!-- 15 -->
+  <section class="slide title-slide">
+    <div class="logo">W</div>
+    <h1>Cảm ơn<br><span class="accent">Hỏi đáp</span></h1>
+    <p class="lead">Dashboard: <code>http://localhost:3000</code> · n8n: <code>http://localhost:5678</code></p>
+  </section>
+
+</div></div>
+
+<div class="hud">
+  <span id="counter"></span>
+  <button type="button" id="prev" aria-label="Slide trước">←</button>
+  <button type="button" id="next" aria-label="Slide sau">→</button>
+  <button type="button" id="fs" title="Toàn màn hình (F)">⛶</button>
+</div>
+
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  const stage = document.getElementById('stage');
+  let i = Math.min(Math.max((parseInt(location.hash.slice(1), 10) || 1) - 1, 0), slides.length - 1);
+
+  // page footer on every content slide
+  slides.forEach((s, n) => { if (!s.classList.contains('title-slide')) s.insertAdjacentHTML('beforeend',
+    `<div class="foot"><span>AI Workforce · n8n</span></div>`); });
+
+  function show(n) {
+    i = Math.min(Math.max(n, 0), slides.length - 1);
+    slides.forEach((s, k) => s.classList.toggle('active', k === i));
+    document.getElementById('counter').textContent = `${i + 1} / ${slides.length}`;
+    document.getElementById('progress').style.width = `${((i + 1) / slides.length) * 100}%`;
+    history.replaceState(null, '', `#${i + 1}`);
+  }
+  function fit() {
+    const s = Math.min(innerWidth / 1280, innerHeight / 720) * 0.96;
+    stage.style.transform = `scale(${s})`;
+  }
+  // ── Image viewer: click a picture to open it. Wheel or +/- zooms (at the cursor), drag pans,
+  //    double-click toggles fit / 100%, 0 = fit, Esc or ✕ closes. Zoom range: fit/2 … 8× natural size.
+  const viewer = { el: null, img: null, s: 1, x: 0, y: 0, fit: 1 };
+  function openViewer(src) {
+    document.body.insertAdjacentHTML('beforeend', `<div class="viewer">
+      <img alt="" draggable="false">
+      <div class="hint">Lăn chuột để phóng to · kéo để di chuyển · nhấp đúp: vừa khung / 100% · Esc để đóng</div>
+      <div class="bar">
+        <button type="button" data-v="out" title="Thu nhỏ (−)">−</button><span class="pct"></span>
+        <button type="button" data-v="in" title="Phóng to (+)">+</button>
+        <button type="button" data-v="fit" title="Vừa khung (0)">Vừa khung</button>
+        <button type="button" data-v="one" title="Kích thước gốc (1)">100%</button>
+        <button type="button" data-v="close" title="Đóng (Esc)">✕</button>
+      </div></div>`);
+    viewer.el = document.querySelector('.viewer');
+    viewer.img = viewer.el.querySelector('img');
+    viewer.img.onload = () => { fitViewer(); setTimeout(() => { const h = viewer.el && viewer.el.querySelector('.hint'); if (h) h.remove(); }, 3500); };
+    viewer.img.src = src;
+  }
+  function closeViewer() { if (!viewer.el) return false; viewer.el.remove(); viewer.el = null; return true; }
+  function drawViewer() {
+    viewer.img.style.transform = `translate(${viewer.x}px, ${viewer.y}px) scale(${viewer.s})`;
+    viewer.el.querySelector('.pct').textContent = `${Math.round(viewer.s * 100)}%`;
+  }
+  function fitViewer() {
+    const W = innerWidth, H = innerHeight - 70, w = viewer.img.naturalWidth, h = viewer.img.naturalHeight;
+    viewer.fit = Math.min(W / w, H / h);
+    viewer.s = viewer.fit; viewer.x = (W - w * viewer.s) / 2; viewer.y = (H - h * viewer.s) / 2;
+    drawViewer();
+  }
+  // zoom to scale s keeping the screen point (cx, cy) fixed
+  function zoomTo(s, cx = innerWidth / 2, cy = (innerHeight - 70) / 2) {
+    s = Math.min(Math.max(s, viewer.fit / 2), 8);
+    viewer.x = cx - (cx - viewer.x) * (s / viewer.s);
+    viewer.y = cy - (cy - viewer.y) * (s / viewer.s);
+    viewer.s = s; drawViewer();
+  }
+  document.addEventListener('click', (e) => {
+    if (viewer.el) {
+      const b = e.target.closest('[data-v]');
+      if (!b) return;
+      const v = b.dataset.v;
+      if (v === 'close') closeViewer(); else if (v === 'fit') fitViewer(); else if (v === 'one') zoomTo(1);
+      else zoomTo(viewer.s * (v === 'in' ? 1.25 : 0.8));
+      return;
+    }
+    const img = e.target.closest('.shot img, .fig img');
+    if (img) openViewer(img.getAttribute('src'));
+    // demo slides: copy the prompt shown on the same slide
+    const copyBtn = e.target.closest('[data-copy-prompt]');
+    if (copyBtn) {
+      const text = copyBtn.closest('.slide').querySelector('.prompt').textContent;
+      const done = (ok) => { copyBtn.textContent = ok ? '✓ Đã sao chép' : '✗ Không chép được'; setTimeout(() => { copyBtn.textContent = '⧉ Sao chép câu lệnh'; }, 1800); };
+      (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(() => done(true), () => {
+        const t = Object.assign(document.createElement('textarea'), { value: text });   // fallback for browsers that block the clipboard API
+        document.body.appendChild(t); t.select(); const ok = document.execCommand('copy'); t.remove(); done(ok);
+      });
+    }
+  });
+  document.addEventListener('wheel', (e) => {
+    if (!viewer.el) return;
+    e.preventDefault();
+    zoomTo(viewer.s * Math.exp(-e.deltaY * 0.0015), e.clientX, e.clientY);
+  }, { passive: false });
+  document.addEventListener('dblclick', (e) => {
+    if (!viewer.el || e.target.closest('.bar')) return;
+    Math.abs(viewer.s - viewer.fit) < 0.01 ? zoomTo(1, e.clientX, e.clientY) : fitViewer();
+  });
+  let drag = null;
+  document.addEventListener('pointerdown', (e) => {
+    if (!viewer.el || e.target.closest('.bar') || e.button !== 0) return;
+    drag = { px: e.clientX, py: e.clientY, x: viewer.x, y: viewer.y };
+    viewer.el.classList.add('dragging');
+  });
+  document.addEventListener('pointermove', (e) => {
+    if (!drag || !viewer.el) return;
+    viewer.x = drag.x + e.clientX - drag.px; viewer.y = drag.y + e.clientY - drag.py; drawViewer();
+  });
+  document.addEventListener('pointerup', () => { drag = null; if (viewer.el) viewer.el.classList.remove('dragging'); });
+  addEventListener('resize', () => { if (viewer.el) fitViewer(); });
+
+  document.addEventListener('keydown', (e) => {
+    if (viewer.el) {
+      if (e.key === 'Escape') closeViewer();
+      else if (e.key === '+' || e.key === '=') zoomTo(viewer.s * 1.25);
+      else if (e.key === '-' || e.key === '_') zoomTo(viewer.s * 0.8);
+      else if (e.key === '0') fitViewer();
+      else if (e.key === '1') zoomTo(1);
+      else if (e.key.startsWith('Arrow')) {
+        const d = 80; viewer.x += e.key === 'ArrowLeft' ? d : e.key === 'ArrowRight' ? -d : 0;
+        viewer.y += e.key === 'ArrowUp' ? d : e.key === 'ArrowDown' ? -d : 0; drawViewer();
+      }
+      e.preventDefault();
+      return;   // slides do not move while a picture is open
+    }
+    if (['ArrowRight', 'PageDown', ' ', 'Enter'].includes(e.key)) { e.preventDefault(); show(i + 1); }
+    else if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); show(i - 1); }
+    else if (e.key === 'Home') show(0);
+    else if (e.key === 'End') show(slides.length - 1);
+    else if (e.key.toLowerCase() === 'f') toggleFs();
+  });
+  function toggleFs() { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); }
+  document.getElementById('prev').onclick = () => show(i - 1);
+  document.getElementById('next').onclick = () => show(i + 1);
+  document.getElementById('fs').onclick = toggleFs;
+  addEventListener('resize', fit);
+  fit(); show(i);
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "objective": "From the transcript, produce a LinkedIn post and, independently, a short-video script plus a summary. Also answer the customer's support question using only the supplied knowledge source.",
+  "requested_by": "e2e-test",
+  "max_revision_cycles": 0,
+  "context": {
+    "transcript": "[Test transcript written for this end-to-end test] Today I want to talk about why most automation projects fail. In our team we automated invoice processing last year. The first attempt failed because we automated a broken process: approvals bounced between three people and nobody owned exceptions. So step one was mapping the process on a whiteboard and removing two approval steps. Step two, we started with the most boring, high-volume case: standard supplier invoices, about 70 percent of our volume. Step three, every exception went to one named owner with a 24-hour response rule. After three months, the average processing time dropped from 6 days to 2 days.",
+    "question": "How do I download my course certificate as a PDF?",
+    "requester_type": "customer",
+    "knowledge_sources": [
+      { "title": "Certificates FAQ (test source)", "source_url": "https://example.com/help/certificates",
+        "content": "Certificates are issued when all lessons in a course are completed. To download one, open My Learning, select the course, then click 'Certificate' and choose 'Download PDF'. Certificates cannot be edited after issue." }
+    ]
+  }
+}

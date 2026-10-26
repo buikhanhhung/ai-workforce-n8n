@@ -1,0 +1,15 @@
+{
+  "name": "wf-renderer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Renders sketch-style social cards (SVG -> PNG) for the Visual Design employee",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@resvg/resvg-js": "2.6.2",
+    "opentype.js": "1.3.4",
+    "roughjs": "4.6.6"
+  }
+}
